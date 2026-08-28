@@ -1,0 +1,108 @@
+#Q3.1
+# Load dataset
+crime <- read.csv(file.choose(), na.strings = "?")
+
+# Remove non-numeric columns
+crime_numeric <- crime[, sapply(crime, is.numeric)]
+
+# Remove missing values
+crime_numeric <- na.omit(crime_numeric)
+
+# Check dataset
+dim(crime_numeric)
+head(crime_numeric)
+
+
+#3.2
+# Define features and target
+features <- crime_numeric[, -ncol(crime_numeric)]
+target <- crime_numeric[, ncol(crime_numeric)]
+
+# Combine
+crime_clean <- data.frame(features, ViolentCrimesPerPop = target)
+
+# Train-test split
+set.seed(123)
+sample_index <- sample(1:nrow(crime_clean), 0.8 * nrow(crime_clean))
+
+train <- crime_clean[sample_index, ]
+test <- crime_clean[-sample_index, ]
+
+
+#Q3.3a
+# Linear Regression model
+lm_model <- lm(ViolentCrimesPerPop ~ ., data = train)
+
+# Predictions
+lm_pred <- predict(lm_model, newdata = test)
+
+#Q3.3b
+library(rpart)
+
+tree_model <- rpart(ViolentCrimesPerPop ~ ., data = train)
+
+tree_pred <- predict(tree_model, newdata = test)
+
+
+#Q3.4
+#RMSE Function
+rmse <- function(actual, predicted) {
+  sqrt(mean((actual - predicted)^2))
+}
+
+#Calculate RMSE
+lm_rmse <- rmse(test$ViolentCrimesPerPop, lm_pred)
+tree_rmse <- rmse(test$ViolentCrimesPerPop, tree_pred)
+
+lm_rmse
+tree_rmse
+
+#R2 Function
+r2 <- function(actual, predicted) {
+  1 - sum((actual - predicted)^2) / sum((actual - mean(actual))^2)
+}
+
+#Calculate R2
+lm_r2 <- r2(test$ViolentCrimesPerPop, lm_pred)
+tree_r2 <- r2(test$ViolentCrimesPerPop, tree_pred)
+
+lm_r2
+tree_r2
+#A negative R2 means: The model is worse than just predicting the average.
+#This is a strong indication that it is a bad model.
+
+
+#Q3.5
+# Training predictions
+lm_train_pred <- predict(lm_model, newdata = train)
+tree_train_pred <- predict(tree_model, newdata = train)
+
+# Training RMSE
+lm_rmse_train <- rmse(train$ViolentCrimesPerPop, lm_train_pred)
+tree_rmse_train <- rmse(train$ViolentCrimesPerPop, tree_train_pred)
+
+# Training R2
+lm_r2_train <- r2(train$ViolentCrimesPerPop, lm_train_pred)
+tree_r2_train <- r2(train$ViolentCrimesPerPop, tree_train_pred)
+
+lm_rmse_train
+tree_rmse_train
+lm_r2_train
+tree_r2_train
+
+#Scatter plots
+# Linear Regression plot
+plot(test$ViolentCrimesPerPop, lm_pred,
+     main = "Linear Regression: Actual vs Predicted",
+     xlab = "Actual",
+     ylab = "Predicted",
+     col = "blue")
+abline(0,1, col = "red")
+
+# Tree plot
+plot(test$ViolentCrimesPerPop, tree_pred,
+     main = "Tree Model: Actual vs Predicted",
+     xlab = "Actual",
+     ylab = "Predicted",
+     col = "green")
+abline(0,1, col = "red")
