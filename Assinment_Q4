@@ -1,0 +1,70 @@
+#Q4.1
+# Load clustering dataset
+wine <- read.csv(file.choose())
+
+# View structure
+str(wine)
+
+# Summary statistics
+summary(wine)
+
+# Check dimensions
+dim(wine)
+
+
+#Q4.2
+# Scale the data
+wine_scaled <- scale(wine)
+
+# PCA
+pca_result <- prcomp(wine_scaled)
+
+# View summary
+summary(pca_result)
+
+# Plot PCA (first two components)
+plot(pca_result$x[,1:2],
+     main = "PCA - First Two Components",
+     xlab = "PC1",
+     ylab = "PC2",
+     col = "blue",
+     pch = 19)
+
+
+#Q4.3
+# Elbow method
+wss <- numeric(10)
+
+for (i in 1:10) {
+  kmeans_model <- kmeans(wine_scaled, centers = i, nstart = 25)
+  wss[i] <- kmeans_model$tot.withinss
+}
+
+# Plot elbow graph
+plot(1:10, wss,
+     type = "b",
+     main = "Elbow Method",
+     xlab = "Number of Clusters (k)",
+     ylab = "Within Cluster Sum of Squares",
+     col = "blue",
+     pch = 19)
+
+#Q4.4
+# Choose optimal k (example: 3)
+k_optimal <- 3
+
+# Run K-means
+kmeans_final <- kmeans(wine_scaled, centers = k_optimal, nstart = 25)
+
+# Plot clusters using PCA
+plot(pca_result$x[,1:2],
+     col = kmeans_final$cluster,
+     pch = 19,
+     main = "Wine Clusters (K-means + PCA)",
+     xlab = "PC1",
+     ylab = "PC2")
+
+legend("topright",
+       legend = paste("Cluster", 1:k_optimal),
+       col = 1:k_optimal,
+       pch = 19)
