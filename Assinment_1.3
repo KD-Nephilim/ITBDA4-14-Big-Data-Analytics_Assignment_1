@@ -1,0 +1,28 @@
+# Load the dataset
+data <- read.csv(file.choose())
+
+# Perform PCA with scaling
+pca_result <- prcomp(data, scale. = TRUE)
+
+# Display summary of PCA (variance explained)
+summary(pca_result)
+
+# View the transformed data (principal components)
+head(pca_result$x)
+
+# Plot the first two principal components
+plot(pca_result$x[,1:2],
+     main = "PCA - First Two Principal Components",
+     xlab = "Principal Component 1",
+     ylab = "Principal Component 2",
+     col = "blue",
+     pch = 19)
+
+#PCA was implemented in R using the prcomp() function.
+#The parameter scale. = TRUE standardises the variables 
+#to ensure that features with larger numerical ranges 
+#do not dominate the analysis. The output includes the 
+#transformed dataset in terms of principal components 
+#and a summary showing the proportion of variance explained 
+#by each component.
+
