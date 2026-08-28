@@ -1,0 +1,62 @@
+#Q2.1
+# Load dataset
+heart <- read.csv(file.choose())
+# Convert all columns to numeric (this creates NA from '?')
+heart[] <- lapply(heart, as.numeric)
+# NOW remove missing values
+heart <- na.omit(heart)
+# View cleaned data
+head(heart)
+
+
+#Q2.2
+# Normalize data (excluding target variable 'num')
+features <- heart[, -ncol(heart)]  # all columns except target
+target <- heart[, ncol(heart)]     # target variable
+# Scale features
+features_scaled <- scale(features)
+# Combine back into dataset
+heart_scaled <- data.frame(features_scaled, num = target)
+# Train-test split (80/20)
+set.seed(123)
+sample_index <- sample(1:nrow(heart_scaled), 0.8 * nrow(heart_scaled))
+
+train <- heart_scaled[sample_index, ]
+test <- heart_scaled[-sample_index, ]
+
+
+#Q2.3
+# Build logistic regression model
+model <- glm(num ~ ., data = train, family = binomial)
+# Predict probabilities
+pred_prob <- predict(model, newdata = test, type = "response")
+# Convert probabilities to binary classes
+pred_class <- ifelse(pred_prob > 0.5, 1, 0)
+# Confusion matrix
+conf_matrix <- table(Predicted = pred_class, Actual = test$num)
+conf_matrix
+# Accuracy
+accuracy <- sum(diag(conf_matrix)) / sum(conf_matrix)
+accuracy
+# Precision
+precision <- conf_matrix[2,2] / (conf_matrix[2,2] + conf_matrix[2,1])
+precision
+# Recall
+recall <- conf_matrix[2,2] / (conf_matrix[2,2] + conf_matrix[1,2])
+recall
+
+
+#Q2.4
+# Extract coefficients
+coefficients <- coef(model)
+# Remove intercept
+coefficients <- coefficients[-1]
+# Sort coefficients
+coefficients_sorted <- sort(coefficients)
+# Plot feature importance
+barplot(coefficients_sorted,
+        main = "Feature Importance (Logistic Regression Coefficients)",
+        xlab = "Features",
+        ylab = "Coefficient Value",
+        col = "blue",
+        las = 2)
